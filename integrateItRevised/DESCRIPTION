@@ -1,0 +1,10 @@
+Package: integrateItRevised
+Type: Package
+Title: Package for estimating integrals
+Version: 1.0
+Date: 2016-04-14
+Author: Jacob H. Hample
+Maintainer: Jacob H. Hample <jacob.hample@wustl.edu>
+Description: Package for estimating integrals using either the trapezoidal rule or Simpson's rule
+License: WUSTL
+RoxygenNote: 5.0.1
