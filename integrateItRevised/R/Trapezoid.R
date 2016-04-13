@@ -36,22 +36,15 @@ setClass(Class = "Trapezoid",
 setValidity("Trapezoid", function(object) {
   sameLength <- length(object@x) == length(object@y) #x and y should be of the same length
   noNA <- all(!is.na(object@x)) & all(!is.na(object@y)) #there should be no NAs
-  logicalBounds <- object@a < object@b #lower bound should be less than upper bound
-  #correctOrderX <- for (i in 1:length(object@x - 1)) {
-  #  ifelse(object@x[i] < object@x[i + 1], TRUE, FALSE)
-  #}
+  boundsOrder <- object@a < object@b #lower bound should be less than upper bound
+  xValueOrder <- all(object@x == sort(object@x))
+  xContainsBounds <- object@a %in% object@x & object@b %in% object@x 
   
   if(!sameLength) {return("x and y must be of the same length")}
-  if(!noNA) {return("There are NAs present in your data. Please remove them to continue.")}
-  if(!logicalBounds) {return("a must be less than b")}
-  
-  if(for (i in 1:length(object@x - 1)) {
-    object@x[i] > object@x[i + 1]
-    }) {return("Values of x must be in order from least to greatest")}
-  
-  if(for (i in 1:length(object@y - 1)) {
-    object@y[i] > object@y[i + 1]
-    }) {return("Values of y must be in order from least to greatest")}
+  if(!noNA) {return("There are NAs present in your data. \nPlease remove them to continue.")}
+  if(!boundsOrder) {return("a must be less than b")}
+  if(!xValueOrder) {return("values within x must be in ascending order")}
+  if(!xContainsBounds) {return("a and b must be values within x")}
   }
 )
 
@@ -67,29 +60,28 @@ setMethod("initialize", "Trapezoid",
 #' @export
 setMethod("print", "Trapezoid",
           function(x){
-            cat("Estimated integral using trapezoidal method: \n")
+            cat("Estimated integral using the trapezoidal rule: \n")
             cat(x@estInt)
           }
 )
 
 #' @export
 setMethod("plot", "Trapezoid", 
-          function(x, y, a, b) {
+          function(x, y = NULL) {
             obj <- x
             
             n <- length(obj@x) - 1
             h <- (obj@x[length(obj@x)] - obj@x[1]) / n
             X <- seq(obj@a, obj@b, by = h)
             y.indices <- which(round(obj@x, 5) %in% round(X, 5))
-            Y <- y[y.indices]
+            Y <- obj@y[y.indices]
             n <- length(X) - 1
             
-            plot(NULL, xlim = c(min(X) - 1, max(X) + 1), ylim = c(min(Y) - 1, max(Y) + 1),
+            plot(NULL, xlim = c(min(X), max(X)), ylim = c(min(Y), max(Y)),
                  main = "Trapezoids", xlab = "X Values", ylab = "Y Values")
-            sapply(1:X[n], function(i) segments(X[i], Y[i], X[i + 1], Y[i + 1]))
+            sapply(1:n, function(i) segments(X[i], Y[i], X[i + 1], Y[i + 1]))
             segments(X[1], 0, X[n + 1], 0)
-            sapply(1:X[n + 1], function(i) segments(X[i], 0, X[i], Y[i]))
-            
+            sapply(1:(n + 1), function(i) segments(X[i], 0, X[i], Y[i]))
           }
 )
 
