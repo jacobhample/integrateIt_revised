@@ -34,6 +34,7 @@ setClass(Class = "Simpson",
          ))
 
 setValidity("Simpson", function(object) {
+  # Subsets x into X, a vector with x values between a and b
   n <- length(object@x) - 1
   h <- (object@x[length(object@x)] - object@x[1]) / n
   X <- seq(object@a, object@b, by = h)
@@ -41,13 +42,15 @@ setValidity("Simpson", function(object) {
   Y <- object@y[y.indices]
   n <- length(X) - 1
   
+  # Tests
   oddLength <- n %% 2 == 0
-  sameLength <- length(object@x) == length(object@y) #x and y should be of the same length
-  noNA <- all(!is.na(object@x)) & all(!is.na(object@y)) #there should be no NAs
-  boundsOrder <- object@a < object@b #lower bound should be less than upper bound
+  sameLength <- length(object@x) == length(object@y)
+  noNA <- all(!is.na(object@x)) & all(!is.na(object@y))
+  boundsOrder <- object@a < object@b
   xValueOrder <- all(object@x == sort(object@x))
   xContainsBounds <- object@a %in% object@x & object@b %in% object@x 
   
+  # Return statements
   if(!oddLength) {return("Simpson's rule requires that you integrate over an odd number of x values")}
   if(!sameLength) {return("x and y must be of the same length")}
   if(!noNA) {return("There are NAs present in your data. Please remove them to continue.")}
@@ -73,3 +76,50 @@ setMethod("print", "Simpson",
             cat(x@estInt)
           }
 )
+
+#' @export
+setMethod("plot", "Simpson", 
+          function(x, y = NULL) {
+            obj <- x
+            
+            # Subsets x into X, a vector with x values between a and b
+            n <- length(obj@x) - 1
+            h <- (obj@x[length(obj@x)] - obj@x[1]) / n
+            X <- seq(obj@a, obj@b, by = h)
+            y.indices <- which(round(obj@x, 5) %in% round(X, 5))
+            Y <- obj@y[y.indices]
+            n <- length(X) - 1
+            
+            # Extracts values from X and puts them into 3 vectors
+            x1 <- X[seq(1, (n - 1), by = 2)]
+            y1 <- Y[seq(1, (n - 1), by = 2)]
+            x2 <- X[seq(2, n, by = 2)]
+            y2 <- Y[seq(2, n, by = 2)]
+            x3 <- X[seq(3, (n + 1), by = 2)]
+            y3 <- Y[seq(3, (n + 1), by = 2)]
+            
+            # Function to make parabolas 
+            parabolas <- function(x, index = 1, x1, x2, x3, y1, y2, y3) {
+              part1 <- y1[index] * (x - x2[index]) * (x - x3[index]) / ((x1[index] - x2[index]) * (x1[index] - x3[index]))
+              part2 <- y2[index] * (x - x1[index]) * (x - x3[index]) / ((x2[index] - x1[index]) * (x2[index] - x3[index]))
+              part3 <- y3[index] * (x - x1[index]) * (x - x2[index]) / ((x3[index] - x1[index]) * (x3[index] - x2[index]))
+              return(part1 + part2 + part3)
+            }
+            
+            # Creates the plot
+            plot(NULL, xlim = c(min(X), max(X)), ylim = c(min(Y), max(Y)),
+                 main = "Simpson's Parabolas", xlab = "X Values", ylab = "Y Values")
+            
+            segments(X, Y, X, 0)
+            segments(X[1], 0, X[n + 1], 0)
+            
+            for(i in 1:length(x1)) {
+              plotX <- seq(x1[i], x3[i], length = 100)
+              plotY <- parabolas(plotX, index = i, x1 = x1, x2 = x2, x3 = x3, y1 = y1, y2 = y2, y3 = y3)
+              lines(plotX, plotY)
+            }
+            
+            points(X, Y, pch = 18, col = "red", cex = 1.1)
+          }
+)
+

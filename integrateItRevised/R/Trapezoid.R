@@ -34,14 +34,16 @@ setClass(Class = "Trapezoid",
          ))
 
 setValidity("Trapezoid", function(object) {
-  sameLength <- length(object@x) == length(object@y) #x and y should be of the same length
-  noNA <- all(!is.na(object@x)) & all(!is.na(object@y)) #there should be no NAs
-  boundsOrder <- object@a < object@b #lower bound should be less than upper bound
+  # Tests
+  sameLength <- length(object@x) == length(object@y)
+  noNA <- all(!is.na(object@x)) & all(!is.na(object@y))
+  boundsOrder <- object@a < object@b
   xValueOrder <- all(object@x == sort(object@x))
-  xContainsBounds <- object@a %in% object@x & object@b %in% object@x 
+  xContainsBounds <- object@a %in% object@x & object@b %in% object@x
   
+  # Return statements
   if(!sameLength) {return("x and y must be of the same length")}
-  if(!noNA) {return("There are NAs present in your data. \nPlease remove them to continue.")}
+  if(!noNA) {return("There are NAs present in your data. Please remove them to continue.")}
   if(!boundsOrder) {return("a must be less than b")}
   if(!xValueOrder) {return("values within x must be in ascending order")}
   if(!xContainsBounds) {return("a and b must be values within x")}
@@ -70,6 +72,7 @@ setMethod("plot", "Trapezoid",
           function(x, y = NULL) {
             obj <- x
             
+            # Subsets x into X, a vector with x values between a and b
             n <- length(obj@x) - 1
             h <- (obj@x[length(obj@x)] - obj@x[1]) / n
             X <- seq(obj@a, obj@b, by = h)
@@ -77,11 +80,13 @@ setMethod("plot", "Trapezoid",
             Y <- obj@y[y.indices]
             n <- length(X) - 1
             
+            # Creates the plot
             plot(NULL, xlim = c(min(X), max(X)), ylim = c(min(Y), max(Y)),
                  main = "Trapezoids", xlab = "X Values", ylab = "Y Values")
             sapply(1:n, function(i) segments(X[i], Y[i], X[i + 1], Y[i + 1]))
             segments(X[1], 0, X[n + 1], 0)
             sapply(1:(n + 1), function(i) segments(X[i], 0, X[i], Y[i]))
+            points(X, Y, pch = 15, col = "blue", cex = 0.8)
           }
 )
 

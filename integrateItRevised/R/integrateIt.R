@@ -31,6 +31,7 @@
 
 #' @export
 integrateIt<-function(rule = "Trap", x, y, a, b) {
+  # Subsets x into X, a vector with x values between a and b
   n <- length(x) - 1
   h <- (x[length(x)] - x[1]) / n
   X <- seq(a, b, by = h)
@@ -39,7 +40,7 @@ integrateIt<-function(rule = "Trap", x, y, a, b) {
   n <- length(X) - 1
   
   if(rule == "Trap") {
-    estInt <- h/2 * (Y[1] + sum(2*Y[2:n]) + Y[n+1])
+    estInt <- h / 2 * (Y[1] + sum(2 * Y[2:n]) + Y[n + 1])
     out <- new("Trapezoid", x = x, y = y, a = a, b = b, estInt = estInt)
   }
   else if (n == 2) { #Simpson's rule when there are only 3 x values
@@ -47,7 +48,7 @@ integrateIt<-function(rule = "Trap", x, y, a, b) {
     out <- new("Simpson", x = x, y = y, a = a, b = b, estInt = estInt)
     }
   else { #Simpson's rule when there are more than 3 x values
-    estInt <- h/3 * (Y[1] + 4 * sum(Y[seq(2, n, by = 2)]) + 2 * sum(Y[seq(3, n-1, by = 2)]) + Y[n+1])
+    estInt <- h / 3 * (Y[1] + 4 * sum(Y[seq(2, n, by = 2)]) + 2 * sum(Y[seq(3, n - 1, by = 2)]) + Y[n + 1])
     out <- new("Simpson", x = x, y = y, a = a, b = b, estInt = estInt)
   }
 }
